@@ -7,9 +7,14 @@ public class SceneController : MonoBehaviour
 {
     public void LoadScene(string sceneName)
     {
-        Time.timeScale = 1f; // Ensure the game is unpaused
-        GameManager.Instance.ResetScores(); // Reset scores before loading the scene
+        Time.timeScale = 1f;
+        GameManager.Instance.ResetScores();
         SceneManager.LoadScene(sceneName);
+    }
+
+    public void LoadGame()
+    {
+        SceneManager.LoadScene("Game Scene");
     }
 
     public void ExitGame()

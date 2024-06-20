@@ -34,6 +34,9 @@ public class Agent : MonoBehaviour
 
     public bool isPlayerControlled = false;
 
+    public Vector2 patrolMinBounds;
+    public Vector2 patrolMaxBounds;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -45,6 +48,7 @@ public class Agent : MonoBehaviour
         {
             Debug.LogError($"{name}: Prison reference is not set!");
         }
+
         if (homeBase == null)
         {
             Debug.LogError($"{name}: Home base reference is not set!");
@@ -68,6 +72,19 @@ public class Agent : MonoBehaviour
         if (newState == AgentState.InPrison)
         {
             EnterPrison();
+        }
+
+        // Check if the state changes from UnderRescue to MovingToPrison
+        if (currentState == AgentState.UnderRescue && newState == AgentState.MovingToPrison && carryingAgent != null)
+        {
+            carryingAgent.ChangeState(AgentState.MovingToPrison);
+            carryingAgent.DetachRescuedAgent();
+        }
+
+        // Ensure target is maintained or reassigned during state changes
+        if (newState == AgentState.Patrolling && target == null)
+        {
+            ChooseNewTargetPosition();
         }
     }
 
@@ -110,6 +127,9 @@ public class Agent : MonoBehaviour
                 case AgentState.InPrison:
                     rb.velocity = Vector2.zero;
                     break;
+                case AgentState.Patrolling:
+                    MoveToTarget(target.position);
+                    break;
             }
 
             // Handle state change for rescued agents when they cross the center line
@@ -136,7 +156,8 @@ public class Agent : MonoBehaviour
         }
 
         // Manually set the state for the agent being carried
-        if (currentState == AgentState.PlayerControlledRescuing && carryingAgent != null && carryingAgent.IsInOwnTerritory())
+        if (currentState == AgentState.PlayerControlledRescuing && carryingAgent != null &&
+            carryingAgent.IsInOwnTerritory())
         {
             Debug.Log($"{name}: Manually changing state from PlayerControlledRescuing to PlayerControlled.");
             currentState = AgentState.PlayerControlled;
@@ -181,7 +202,8 @@ public class Agent : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Flag") && !hasFlag && carryingAgent == null && currentState != AgentState.UnderRescue && currentState != AgentState.PlayerControlledRescuing)
+        if (other.CompareTag("Flag") && !hasFlag && carryingAgent == null && currentState != AgentState.UnderRescue &&
+            currentState != AgentState.PlayerControlledRescuing)
         {
             Flag flagScript = other.GetComponent<Flag>();
             if (flagScript != null && flagScript.flagTeam != team && flagScript.AttachedToAgent == null)
@@ -193,6 +215,7 @@ public class Agent : MonoBehaviour
                 {
                     ChangeState(AgentState.MovingToFlag);
                 }
+
                 flagScript.AttachToAgent(this);
             }
         }
@@ -201,12 +224,10 @@ public class Agent : MonoBehaviour
             Agent otherAgent = other.GetComponent<Agent>();
             if (otherAgent != null)
             {
-                if (otherAgent.team == team && otherAgent.currentState == AgentState.InPrison && currentState != AgentState.InPrison)
+                if (otherAgent.team == team && otherAgent.currentState == AgentState.InPrison &&
+                    currentState != AgentState.InPrison)
                 {
-                    if (!hasFlag && carryingAgent == null && currentState != AgentState.UnderRescue)
-                    {
-                        FreeFromPrison(otherAgent);
-                    }
+                    FreeFromPrison(otherAgent);
                 }
                 else if (otherAgent.team != team)
                 {
@@ -218,17 +239,19 @@ public class Agent : MonoBehaviour
 
     private void HandleEnemyTag(Agent otherAgent)
     {
-        if (IsInEnemyTerritory() && otherAgent.IsInOwnTerritory() && otherAgent.currentState != Agent.AgentState.InPrison)
+        if (IsInEnemyTerritory() && otherAgent.IsInOwnTerritory() && otherAgent.currentState != AgentState.InPrison)
         {
-            if (currentState == Agent.AgentState.UnderRescue || currentState == Agent.AgentState.PlayerControlledRescuing)
+            if (currentState == AgentState.UnderRescue || currentState == AgentState.PlayerControlledRescuing)
             {
                 if (carryingAgent != null)
                 {
                     carryingAgent.GoToPrison();
                 }
+
                 GoToPrison();
             }
-            else if (otherAgent.currentState == Agent.AgentState.UnderRescue || otherAgent.currentState == Agent.AgentState.PlayerControlledRescuing)
+            else if (otherAgent.currentState == AgentState.UnderRescue ||
+                     otherAgent.currentState == AgentState.PlayerControlledRescuing)
             {
                 otherAgent.GoToPrison();
                 if (otherAgent.carryingAgent != null)
@@ -267,7 +290,6 @@ public class Agent : MonoBehaviour
         );
         target = prison;
         isPlayerControlled = false; // Disable player control
-        spriteRenderer.color = Color.gray; // Change color to indicate being captured
         Debug.Log($"{gameObject.name}: Going to prison at position {prisonSpot}");
 
         // Notify PlayerController to deselect this agent if it is selected
@@ -338,6 +360,7 @@ public class Agent : MonoBehaviour
                 flagScript.DetachFromAgent();
                 flagScript.ResetPosition();
             }
+
             carriedFlag = null;
             hasFlag = false;
         }
@@ -371,6 +394,27 @@ public class Agent : MonoBehaviour
                 ChangeState(AgentState.Idle);
                 target = null;
             }
+        }
+    }
+
+    private void ChooseNewTargetPosition()
+    {
+        // Ensure target is maintained or reassigned during state changes
+        Vector3 newTargetPosition = new Vector3(
+            Random.Range(patrolMinBounds.x, patrolMaxBounds.x),
+            Random.Range(patrolMinBounds.y, patrolMaxBounds.y),
+            transform.position.z
+        );
+
+        if (target == null)
+        {
+            GameObject targetObject = new GameObject("Target");
+            targetObject.transform.position = newTargetPosition;
+            target = targetObject.transform;
+        }
+        else
+        {
+            target.position = newTargetPosition;
         }
     }
 }

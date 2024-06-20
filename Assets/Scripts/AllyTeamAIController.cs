@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class AIController : MonoBehaviour
+public class AllyTeamAIController : MonoBehaviour
 {
-    public Agent[] aiAgents; // Only the agents controlled by AI
+    public Agent[] allyAgents; // Only the agents controlled by AI
     public float decisionInterval = 2f;
     public Vector2 baseMinBounds;
     public Vector2 baseMaxBounds;
@@ -12,7 +12,7 @@ public class AIController : MonoBehaviour
     private void Start()
     {
         decisionTimer = decisionInterval;
-        foreach (var agent in aiAgents)
+        foreach (var agent in allyAgents)
         {
             agent.isPlayerControlled = false;
             agent.currentState = Agent.AgentState.Patrolling; // Start AI agents in Patrolling state
@@ -22,24 +22,24 @@ public class AIController : MonoBehaviour
 
     private void Update()
     {
+        foreach (var agent in allyAgents)
+        {
+            if (!agent.isPlayerControlled) // Ensure AI only controls non-player agents
+            {
+                Patrol(agent);
+            }
+        }
+
         decisionTimer -= Time.deltaTime;
         if (decisionTimer <= 0f)
         {
             decisionTimer = decisionInterval;
-            foreach (var agent in aiAgents)
+            foreach (var agent in allyAgents)
             {
                 if (!agent.isPlayerControlled) // Ensure AI only controls non-player agents
                 {
                     MakeDecision(agent);
                 }
-            }
-        }
-
-        foreach (var agent in aiAgents)
-        {
-            if (!agent.isPlayerControlled) // Ensure AI only controls non-player agents
-            {
-                Patrol(agent);
             }
         }
     }
@@ -55,6 +55,10 @@ public class AIController : MonoBehaviour
 
     private void Patrol(Agent agent)
     {
+        if (agent.target == null)
+        {
+            ChooseNewTargetPosition(agent);
+        }
         agent.Move((agent.target.position - agent.transform.position).normalized);
         if (Vector3.Distance(agent.transform.position, agent.target.position) < 0.1f)
         {

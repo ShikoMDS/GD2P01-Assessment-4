@@ -422,8 +422,13 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 620417468}
+    - target: {fileID: 7257333012660102445, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8805255327679615647, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+    - {fileID: 470488959601845946, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -731,6 +736,58 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9220351314726832326, guid: 7a56108ec86233c43a3b4e9a4a64f988, type: 3}
   m_PrefabInstance: {fileID: 1987323340}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &631244409
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 631244411}
+  - component: {fileID: 631244410}
+  m_Layer: 0
+  m_Name: AIController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &631244410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 631244409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  aiAgents:
+  - {fileID: 1979194939}
+  - {fileID: 2114111869}
+  - {fileID: 1227994753}
+  - {fileID: 1875002062}
+  decisionInterval: 2
+  baseMinBounds: {x: 0, y: -9}
+  baseMaxBounds: {x: 19, y: 9}
+--- !u!4 &631244411
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 631244409}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 657.75085, y: 646.31537, z: -2.0353312}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &660199335
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -791,7 +848,8 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 531648946}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -6791897113717508411, guid: ff9452e989169414f9ad2081b1de7ab2, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -993,7 +1051,8 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 531648946}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -6791897113717508411, guid: ff9452e989169414f9ad2081b1de7ab2, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1532,6 +1591,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   flagsToWin: 4
+  winTextPrefab: {fileID: 184944804676368564, guid: 1bb7fddf2f9a32f45bf6e6e1793b3d05, type: 3}
+  loseTextPrefab: {fileID: 4122642056300464653, guid: ef7a237b282627a468bec88df3e56a32, type: 3}
+  uiCanvas: {fileID: 1522315117}
 --- !u!1001 &1268749835
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1592,8 +1654,13 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 620417468}
+    - target: {fileID: 7257333012660102445, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8805255327679615647, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+    - {fileID: 470488959601845946, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1658,7 +1725,8 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 531648946}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -6791897113717508411, guid: ff9452e989169414f9ad2081b1de7ab2, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1702,7 +1770,6 @@ MonoBehaviour:
   - {fileID: 619971865}
   - {fileID: 1081526921}
   - {fileID: 1197771088}
-  - {fileID: 1979194939}
   - {fileID: 2114111869}
   - {fileID: 1227994753}
   - {fileID: 1875002062}
@@ -1731,6 +1798,58 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3550946716054893693, guid: 6f22b51dd5a4c94439deb89900969a09, type: 3}
   m_PrefabInstance: {fileID: 1801242639}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1517978102
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1517978103}
+  - component: {fileID: 1517978104}
+  m_Layer: 0
+  m_Name: AllyTeamAIController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1517978103
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517978102}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 769, y: 363.5, z: -8.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1517978104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517978102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49979ef72a261e343a2e34d6b7035f2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allyAgents:
+  - {fileID: 342355151}
+  - {fileID: 619971865}
+  - {fileID: 1081526921}
+  - {fileID: 1197771088}
+  decisionInterval: 2
+  baseMinBounds: {x: 0, y: -9}
+  baseMaxBounds: {x: -19, y: 9}
 --- !u!1 &1522315116
 GameObject:
   m_ObjectHideFlags: 0
@@ -2045,8 +2164,13 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 620417468}
+    - target: {fileID: 7257333012660102445, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8805255327679615647, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+    - {fileID: 470488959601845946, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -2559,7 +2683,8 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 531648946}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -6791897113717508411, guid: ff9452e989169414f9ad2081b1de7ab2, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -2685,8 +2810,16 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 470488959601845946, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 470488959601845946, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+      propertyPath: aiAgents.Array.size
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 470488959601845946, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+      propertyPath: aiAgents.Array.data[0]
+      value: 
+      objectReference: {fileID: 1979194939}
     - target: {fileID: 3586591207555244637, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
       propertyPath: m_Name
       value: RedTeamAgent
@@ -2735,8 +2868,13 @@ PrefabInstance:
       propertyPath: prison
       value: 
       objectReference: {fileID: 620417468}
+    - target: {fileID: 7257333012660102445, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8805255327679615647, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
+    - {fileID: 470488959601845946, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -2945,3 +3083,5 @@ SceneRoots:
   - {fileID: 1407132623}
   - {fileID: 697650895}
   - {fileID: 1234934937}
+  - {fileID: 631244411}
+  - {fileID: 1517978103}
