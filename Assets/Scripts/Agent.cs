@@ -112,23 +112,14 @@ public class Agent : MonoBehaviour
                     break;
             }
 
-            // Handle state change for rescuing agents when back in own territory
-            if (currentState == AgentState.PlayerControlledRescuing && carryingAgent != null && IsInOwnTerritory())
-            {
-                Debug.Log($"{name}: Rescuing agent is back in own territory. Changing state from PlayerControlledRescuing to PlayerControlled.");
-                ChangeState(AgentState.PlayerControlled);
-                carryingAgent.ChangeState(AgentState.Idle);
-                carryingAgent.target = null;
-                carryingAgent = null;
-            }
-
-            // Handle state change for rescued agents
-            if (currentState == AgentState.UnderRescue && IsInOwnTerritory())
+            // Handle state change for rescued agents when they cross the center line
+            if (currentState == AgentState.UnderRescue && carryingAgent != null && carryingAgent.IsInOwnTerritory())
             {
                 Debug.Log($"{name}: Rescued agent is back in own territory. Changing state from UnderRescue to Idle.");
                 ChangeState(AgentState.Idle);
                 target = null;
-                DetachRescuedAgent();
+                carryingAgent.ChangeState(AgentState.PlayerControlled);
+                carryingAgent = null;
             }
         }
 
@@ -145,16 +136,13 @@ public class Agent : MonoBehaviour
         }
 
         // Manually set the state for the agent being carried
-        if (currentState == AgentState.PlayerControlledRescuing && IsInOwnTerritory())
+        if (currentState == AgentState.PlayerControlledRescuing && carryingAgent != null && carryingAgent.IsInOwnTerritory())
         {
             Debug.Log($"{name}: Manually changing state from PlayerControlledRescuing to PlayerControlled.");
             currentState = AgentState.PlayerControlled;
-            if (carryingAgent != null)
-            {
-                carryingAgent.ChangeState(AgentState.Idle);
-                carryingAgent.target = null;
-                carryingAgent = null;
-            }
+            carryingAgent.ChangeState(AgentState.Idle);
+            carryingAgent.target = null;
+            carryingAgent = null;
         }
     }
 
@@ -237,12 +225,6 @@ public class Agent : MonoBehaviour
                 if (carryingAgent != null)
                 {
                     carryingAgent.GoToPrison();
-                    carryingAgent = null;
-                }
-                PlayerController playerController = FindObjectOfType<PlayerController>();
-                if (playerController != null && playerController.SelectedAgent == this)
-                {
-                    playerController.DeselectAgent();
                 }
                 GoToPrison();
             }
@@ -252,7 +234,6 @@ public class Agent : MonoBehaviour
                 if (otherAgent.carryingAgent != null)
                 {
                     otherAgent.carryingAgent.GoToPrison();
-                    otherAgent.carryingAgent = null;
                 }
             }
             else
