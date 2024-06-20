@@ -86,7 +86,12 @@ public class PlayerController : MonoBehaviour
         {
             SelectedAgent.isPlayerControlled = false;
             SelectedAgent.ResetColor();
-            if (SelectedAgent.currentState != Agent.AgentState.MovingToPrison && SelectedAgent.currentState != Agent.AgentState.InPrison)
+            if (SelectedAgent.currentState == Agent.AgentState.PlayerControlledRescuing)
+            {
+                SelectedAgent.ChangeState(Agent.AgentState.PlayerControlled);
+                SelectedAgent.DetachRescuedAgent();
+            }
+            else if (SelectedAgent.currentState != Agent.AgentState.MovingToPrison && SelectedAgent.currentState != Agent.AgentState.InPrison)
             {
                 SelectedAgent.ChangeState(Agent.AgentState.Idle);
             }

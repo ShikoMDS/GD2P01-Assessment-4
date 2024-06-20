@@ -1,4 +1,3 @@
-using System.Xml.Linq;
 using UnityEngine;
 
 public class Agent : MonoBehaviour
@@ -64,6 +63,7 @@ public class Agent : MonoBehaviour
 
     public void ChangeState(AgentState newState)
     {
+        Debug.Log($"{name}: Changing state from {currentState} to {newState}");
         currentState = newState;
         if (newState == AgentState.InPrison)
         {
@@ -112,25 +112,49 @@ public class Agent : MonoBehaviour
                     break;
             }
 
-            if (currentState == AgentState.UnderRescue && IsInOwnTerritory())
+            // Handle state change for rescuing agents when back in own territory
+            if (currentState == AgentState.PlayerControlledRescuing && carryingAgent != null && IsInOwnTerritory())
             {
-                currentState = AgentState.Idle;
-                target = null;
-                DetachRescuedAgent();
-            }
-
-            if (currentState == AgentState.PlayerControlledRescuing && carryingAgent != null && carryingAgent.IsInOwnTerritory())
-            {
-                currentState = AgentState.PlayerControlled;
-                carryingAgent.currentState = AgentState.Idle;
+                Debug.Log($"{name}: Rescuing agent is back in own territory. Changing state from PlayerControlledRescuing to PlayerControlled.");
+                ChangeState(AgentState.PlayerControlled);
+                carryingAgent.ChangeState(AgentState.Idle);
                 carryingAgent.target = null;
                 carryingAgent = null;
+            }
+
+            // Handle state change for rescued agents
+            if (currentState == AgentState.UnderRescue && IsInOwnTerritory())
+            {
+                Debug.Log($"{name}: Rescued agent is back in own territory. Changing state from UnderRescue to Idle.");
+                ChangeState(AgentState.Idle);
+                target = null;
+                DetachRescuedAgent();
             }
         }
 
         if (currentState == AgentState.MovingToPrison && Vector2.Distance(transform.position, prisonSpot) < 0.1f)
         {
             EnterPrison();
+        }
+
+        // Check if the carrying agent should be set to null
+        if (carryingAgent != null && carryingAgent.currentState == AgentState.Idle)
+        {
+            Debug.Log($"{name}: Detaching rescued agent.");
+            carryingAgent = null;
+        }
+
+        // Manually set the state for the agent being carried
+        if (currentState == AgentState.PlayerControlledRescuing && IsInOwnTerritory())
+        {
+            Debug.Log($"{name}: Manually changing state from PlayerControlledRescuing to PlayerControlled.");
+            currentState = AgentState.PlayerControlled;
+            if (carryingAgent != null)
+            {
+                carryingAgent.ChangeState(AgentState.Idle);
+                carryingAgent.target = null;
+                carryingAgent = null;
+            }
         }
     }
 
@@ -169,7 +193,7 @@ public class Agent : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Flag") && !hasFlag && carryingAgent == null && currentState != AgentState.UnderRescue)
+        if (other.CompareTag("Flag") && !hasFlag && carryingAgent == null && currentState != AgentState.UnderRescue && currentState != AgentState.PlayerControlledRescuing)
         {
             Flag flagScript = other.GetComponent<Flag>();
             if (flagScript != null && flagScript.flagTeam != team && flagScript.AttachedToAgent == null)
@@ -179,7 +203,7 @@ public class Agent : MonoBehaviour
                 target = homeBase;
                 if (currentState != AgentState.PlayerControlled)
                 {
-                    currentState = AgentState.MovingToFlag;
+                    ChangeState(AgentState.MovingToFlag);
                 }
                 flagScript.AttachToAgent(this);
             }
@@ -251,7 +275,7 @@ public class Agent : MonoBehaviour
             carryingAgent = null;
         }
 
-        currentState = AgentState.MovingToPrison;
+        ChangeState(AgentState.MovingToPrison);
         gameObject.layer = LayerMask.NameToLayer(team == Team.Blue ? "BlueTeamToPrison" : "RedTeamToPrison");
 
         Bounds prisonBounds = prison.GetComponent<Collider2D>().bounds;
@@ -275,11 +299,11 @@ public class Agent : MonoBehaviour
 
     public void FreeFromPrison(Agent rescuedAgent)
     {
-        if (rescuedAgent.currentState == AgentState.InPrison)
+        if (carryingAgent == null && rescuedAgent.currentState == AgentState.InPrison)
         {
-            currentState = AgentState.PlayerControlledRescuing;
+            ChangeState(AgentState.PlayerControlledRescuing);
             carryingAgent = rescuedAgent;
-            rescuedAgent.currentState = AgentState.UnderRescue;
+            rescuedAgent.ChangeState(AgentState.UnderRescue);
             rescuedAgent.target = this.transform;
             target = homeBase;
         }
@@ -290,7 +314,7 @@ public class Agent : MonoBehaviour
         if (carryingAgent != null)
         {
             carryingAgent.target = null;
-            carryingAgent.currentState = AgentState.Idle;
+            carryingAgent.ChangeState(AgentState.Idle);
             carryingAgent = null;
         }
     }
@@ -313,7 +337,7 @@ public class Agent : MonoBehaviour
         GameManager.Instance.ScorePoint(team);
         if (currentState != AgentState.PlayerControlled && currentState != AgentState.PlayerControlledRescuing)
         {
-            currentState = AgentState.Idle;
+            ChangeState(AgentState.Idle);
         }
 
         if (carriedFlag != null)
@@ -352,7 +376,7 @@ public class Agent : MonoBehaviour
         if (spriteRenderer != null)
         {
             spriteRenderer.color = Color.yellow;
-            currentState = AgentState.PlayerControlled;
+            ChangeState(AgentState.PlayerControlled);
         }
     }
 
@@ -363,7 +387,7 @@ public class Agent : MonoBehaviour
             spriteRenderer.color = originalColor;
             if (currentState != AgentState.MovingToPrison && currentState != AgentState.InPrison)
             {
-                currentState = AgentState.Idle;
+                ChangeState(AgentState.Idle);
                 target = null;
             }
         }
