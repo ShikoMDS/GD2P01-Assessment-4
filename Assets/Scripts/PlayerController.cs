@@ -1,101 +1,84 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public Agent[] playerAgents; // Only the agents that the player can control
-    public Agent SelectedAgent { get; private set; }
+    public AIAgent[] blueTeamAgents; // Assign this in the Inspector with your blue team agents
+    public AIAgent controlledAgent;
+    public float moveSpeed = 5f;
+    private Renderer controlledAgentRenderer;
+    private Color originalColor;
+    private Rigidbody2D controlledAgentRigidbody;
 
-    private void Start()
+    void Update()
     {
-        if (playerAgents.Length > 0)
+        HandleAgentSelection();
+    }
+
+    void FixedUpdate()
+    {
+        if (controlledAgent != null && controlledAgent.isControlledByPlayer)
         {
-            SelectAgent(0); // Start by selecting the first agent
+            HandlePlayerInput();
         }
     }
 
-    private void Update()
+    void HandlePlayerInput()
     {
-        for (int i = 0; i < playerAgents.Length; i++)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-            {
-                SelectAgent(i);
-            }
-        }
+        float moveHorizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right arrow keys
+        float moveVertical = Input.GetAxis("Vertical"); // W/S or Up/Down arrow keys
 
-        if (SelectedAgent != null)
+        // Debug log to check the input values
+        Debug.Log($"Horizontal Input: {moveHorizontal}, Vertical Input: {moveVertical}");
+
+        // Combine horizontal and vertical inputs for movement in the X and Y plane
+        Vector2 movement = new Vector2(moveHorizontal, moveVertical);
+
+        // Move the agent using Rigidbody2D
+        controlledAgentRigidbody.MovePosition(controlledAgentRigidbody.position + movement * moveSpeed * Time.fixedDeltaTime);
+    }
+
+    void HandleAgentSelection()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            if (SelectedAgent.currentState == Agent.AgentState.PlayerControlled)
-            {
-                Vector2 moveDirection = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-                SelectedAgent.Move(moveDirection);
-            }
-            else if (SelectedAgent.currentState == Agent.AgentState.MovingToPrison || SelectedAgent.currentState == Agent.AgentState.InPrison)
-            {
-                DeselectAgent();
-            }
+            SelectAgent(0);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            SelectAgent(1);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            SelectAgent(2);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            SelectAgent(3);
         }
     }
 
-    private void SelectAgent(int index)
+    void SelectAgent(int index)
     {
-        if (index >= 0 && index < playerAgents.Length)
+        if (index < 0 || index >= blueTeamAgents.Length)
         {
-            if (SelectedAgent != null)
-            {
-                DeselectAgent();
-            }
-
-            Agent newSelectedAgent = playerAgents[index];
-            if (newSelectedAgent.currentState != Agent.AgentState.InPrison &&
-                newSelectedAgent.currentState != Agent.AgentState.MovingToPrison &&
-                newSelectedAgent.currentState != Agent.AgentState.UnderRescue)
-            {
-                SelectedAgent = newSelectedAgent;
-                SelectedAgent.isPlayerControlled = true;
-                SelectedAgent.ControlledColor();
-                HighlightSelectedAgent();
-            }
-            else
-            {
-                SelectedAgent = null;
-            }
+            return;
         }
-    }
 
-    private void HighlightSelectedAgent()
-    {
-        foreach (Agent agent in playerAgents)
+        if (controlledAgent != null)
         {
-            if (agent == SelectedAgent)
-            {
-                agent.GetComponent<SpriteRenderer>().color = Color.yellow;
-            }
-            else
-            {
-                agent.GetComponent<SpriteRenderer>().color = agent.originalColor;
-            }
+            controlledAgent.isControlledByPlayer = false; // Release previous agent
+            controlledAgentRenderer.material.color = originalColor; // Reset color
         }
-    }
 
-    public void DeselectAgent()
-    {
-        if (SelectedAgent != null)
-        {
-            SelectedAgent.isPlayerControlled = false;
-            SelectedAgent.ResetColor();
-            if (SelectedAgent.currentState == Agent.AgentState.PlayerControlledRescuing)
-            {
-                SelectedAgent.ChangeState(Agent.AgentState.PlayerControlled);
-                SelectedAgent.DetachRescuedAgent();
-            }
-            else if (SelectedAgent.currentState != Agent.AgentState.MovingToPrison && SelectedAgent.currentState != Agent.AgentState.InPrison)
-            {
-                SelectedAgent.ChangeState(Agent.AgentState.Idle);
-            }
-            SelectedAgent = null;
-        }
+        controlledAgent = blueTeamAgents[index];
+        controlledAgent.isControlledByPlayer = true; // Control new agent
+
+        // Highlight the selected agent
+        controlledAgentRenderer = controlledAgent.GetComponent<Renderer>();
+        originalColor = controlledAgentRenderer.material.color;
+        controlledAgentRenderer.material.color = Color.yellow; // Highlight color
+
+        // Get the Rigidbody2D component of the controlled agent
+        controlledAgentRigidbody = controlledAgent.GetComponent<Rigidbody2D>();
     }
 }

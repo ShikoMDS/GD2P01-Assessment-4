@@ -1,41 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Flag : MonoBehaviour
 {
-    public Team flagTeam; // The team the flag belongs to
-    private Agent attachedToAgent; // The agent currently carrying the flag
-    private Vector3 originalPosition; // The original position of the flag
+    public Team team;
 
-    private void Start()
+    void OnTriggerEnter(Collider other)
     {
-        originalPosition = transform.position;
-    }
-
-    public void AttachToAgent(Agent agent)
-    {
-        attachedToAgent = agent;
-        transform.SetParent(agent.transform);
-        transform.localPosition = Vector3.zero;
-    }
-
-    public void DetachFromAgent()
-    {
-        if (attachedToAgent != null)
+        AIAgent agent = other.GetComponent<AIAgent>();
+        if (agent != null && agent.team != team)
         {
-            attachedToAgent = null;
-            transform.SetParent(null);
+            GameManager.Instance.CaptureFlag(agent.team);
+            // Additional logic for flag capture (e.g., respawn flag, notify agents)
         }
-    }
-
-    public void ResetPosition()
-    {
-        transform.position = originalPosition;
-    }
-
-    public Agent AttachedToAgent
-    {
-        get { return attachedToAgent; }
     }
 }

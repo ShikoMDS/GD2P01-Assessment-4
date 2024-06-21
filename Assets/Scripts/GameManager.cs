@@ -1,150 +1,100 @@
 using UnityEngine;
-using System.Linq;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
-    public int flagsToWin = 4;
+    public static GameManager Instance { get; private set; }
 
-    private int blueTeamScore = 0;
-    private int redTeamScore = 0;
+    public AIAgent[] redTeamAgents;
+    public AIAgent[] blueTeamAgents;
+    public Transform redTeamPrison;
+    public Transform blueTeamPrison;
+    public Transform redTeamBase;
+    public Transform blueTeamBase;
+    public int flagsToCaptureToWin = 4;
+    public GameObject gameOverUI;
+    public Text gameOverText;
 
-    public GameObject winTextPrefab; // Reference to Win text prefab
-    public GameObject loseTextPrefab; // Reference to Lose text prefab
-    public Transform uiCanvas; // Reference to UI Canvas
+    private int redTeamCapturedFlags = 0;
+    private int blueTeamCapturedFlags = 0;
 
-    private Agent[] blueTeamAgents; // Array to hold all Blue team agents
-    private Agent[] redTeamAgents; // Array to hold all Red team agents
+    public PlayerController playerController;
 
-    private void Awake()
+    void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            SceneManager.sceneLoaded += OnSceneLoaded; // Subscribe to sceneLoaded event
         }
         else
         {
             Destroy(gameObject);
-            return;
         }
     }
 
-    private void Start()
+    void Start()
     {
-        AssignReferences();
+        gameOverUI.SetActive(false);
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    void Update()
     {
-        AssignReferences(); // Reassign references after the scene is loaded
+        CheckForWin();
     }
 
-    private void AssignReferences()
+    public void CaptureFlag(Team team)
     {
-        // Only assign references and log debug information in the "Game" scene
-        if (SceneManager.GetActiveScene().name == "Game")
+        if (team == Team.Red)
         {
-            blueTeamAgents = FindObjectsOfType<Agent>().Where(agent => agent.gameObject.layer == LayerMask.NameToLayer("BlueTeam")).ToArray();
-            redTeamAgents = FindObjectsOfType<Agent>().Where(agent => agent.gameObject.layer == LayerMask.NameToLayer("RedTeam")).ToArray();
-
-            Debug.Log($"Blue Team Agents: {blueTeamAgents.Length}");
-            Debug.Log($"Red Team Agents: {redTeamAgents.Length}");
-
-            if (blueTeamAgents.Length == 0 || redTeamAgents.Length == 0)
-            {
-                Debug.LogError("Team agents not initialized properly. Make sure agents are assigned to the correct layers.");
-            }
-
-            if (winTextPrefab == null || loseTextPrefab == null || uiCanvas == null)
-            {
-                Debug.LogError("UI elements are not assigned in the Inspector.");
-            }
+            redTeamCapturedFlags++;
+        }
+        else if (team == Team.Blue)
+        {
+            blueTeamCapturedFlags++;
         }
     }
 
-    public void ScorePoint(Team team)
+    void CheckForWin()
     {
-        if (team == Team.Blue)
+        if (redTeamCapturedFlags >= flagsToCaptureToWin)
         {
-            blueTeamScore++;
-            Debug.Log($"Blue Team scored! Current score: {blueTeamScore}");
-            if (blueTeamScore >= flagsToWin)
-            {
-                DeclareWinner(Team.Blue);
-            }
+            EndGame(Team.Red);
         }
-        else if (team == Team.Red)
+        else if (blueTeamCapturedFlags >= flagsToCaptureToWin)
         {
-            redTeamScore++;
-            Debug.Log($"Red Team scored! Current score: {redTeamScore}");
-            if (redTeamScore >= flagsToWin)
-            {
-                DeclareWinner(Team.Red);
-            }
-        }
-
-        CheckGameEnd(); // Check if game should end after scoring
-    }
-
-    private void DeclareWinner(Team winningTeam)
-    {
-        Debug.Log($"{winningTeam} Team wins!");
-        DisplayEndText(winningTeam == Team.Blue); // Display win/lose text
-    }
-
-    public void ReturnFlagToBase(GameObject flag)
-    {
-        Flag flagScript = flag.GetComponent<Flag>();
-        if (flagScript != null)
-        {
-            flagScript.ResetPosition();
+            EndGame(Team.Blue);
         }
     }
 
-    public void ResetScores()
+    void EndGame(Team winningTeam)
     {
-        blueTeamScore = 0;
-        redTeamScore = 0;
-        Debug.Log("Scores reset");
-    }
-
-    private void CheckGameEnd() // Method to check game end conditions
-    {
-        if (blueTeamAgents == null || redTeamAgents == null)
+        gameOverUI.SetActive(true);
+        if (winningTeam == Team.Red)
         {
-            Debug.LogError("Team agents not initialized properly.");
-            return;
+            gameOverText.text = "Red Team Wins!";
+        }
+        else if (winningTeam == Team.Blue)
+        {
+            gameOverText.text = "Blue Team Wins!";
         }
 
-        bool blueTeamWins = blueTeamScore >= flagsToWin || redTeamAgents.All(agent => agent.currentState == Agent.AgentState.InPrison);
-        bool redTeamWins = redTeamScore >= flagsToWin || blueTeamAgents.All(agent => agent.currentState == Agent.AgentState.InPrison);
-
-        if (blueTeamWins)
+        // Disable further gameplay
+        foreach (var agent in redTeamAgents)
         {
-            DisplayEndText(true);
-        }
-        else if (redTeamWins)
-        {
-            DisplayEndText(false);
-        }
-    }
-
-    private void DisplayEndText(bool blueWins) // Method to display win/lose text
-    {
-        if (winTextPrefab == null || loseTextPrefab == null || uiCanvas == null)
-        {
-            Debug.LogError("UI elements are not assigned in the Inspector.");
-            return;
+            agent.enabled = false;
         }
 
-        GameObject endText = Instantiate(blueWins ? winTextPrefab : loseTextPrefab, uiCanvas);
-        UnityEngine.UI.Text textComponent = endText.GetComponent<UnityEngine.UI.Text>();
-        if (textComponent != null)
+        foreach (var agent in blueTeamAgents)
         {
-            textComponent.text = blueWins ? "Win" : "Lose";
+            agent.enabled = false;
+        }
+
+        // If using the player controller to control agents, disable player control
+        if (playerController != null && playerController.controlledAgent != null)
+        {
+            playerController.controlledAgent.isControlledByPlayer = false;
+            playerController.controlledAgent = null;
         }
     }
 }
