@@ -15,7 +15,8 @@ public class AIAgent : MonoBehaviour
         BeingEscorted,
         Wandering,
         CapturingFlag,
-        Rescuing
+        Rescuing,
+        Evading
     }
 
     public Team team;
@@ -41,6 +42,7 @@ public class AIAgent : MonoBehaviour
     private AIAgent targetAlly;
     private float wanderTimer;
     private const float maxWanderTime = 5f; // Maximum time to wander before re-evaluating decisions
+    private const float evadeRange = 5f; // Distance at which the AI should start evading
 
     void Update()
     {
@@ -58,6 +60,15 @@ public class AIAgent : MonoBehaviour
         {
             escortedAgent.transform.position = transform.position;
         }
+
+        ClampPosition();
+    }
+
+    void ClampPosition()
+    {
+        float clampedX = Mathf.Clamp(transform.position.x, -16f, 16f);
+        float clampedY = Mathf.Clamp(transform.position.y, -9f, 9f);
+        transform.position = new Vector3(clampedX, clampedY, transform.position.z);
     }
 
     void UpdateAI()
@@ -94,6 +105,49 @@ public class AIAgent : MonoBehaviour
             case State.Rescuing:
                 RescueTargetAlly();
                 break;
+            case State.Evading:
+                Evade();
+                break;
+        }
+    }
+
+    void Evade()
+    {
+        Vector3 evadeDirection = Vector3.zero;
+        float closestDistance = float.MaxValue;
+
+        foreach (var agent in enemies)
+        {
+            float distance = Vector3.Distance(transform.position, agent.transform.position);
+            if (distance < closestDistance && distance < evadeRange)
+            {
+                closestDistance = distance;
+                evadeDirection = transform.position - agent.transform.position;
+            }
+        }
+
+        evadeDirection.Normalize();
+        Vector3 evadeTarget = transform.position + evadeDirection * evadeRange;
+
+        MoveTowards(evadeTarget);
+
+        // Check if the AI has successfully evaded and can continue its previous task
+        if (IsInOwnTerritory() || Vector3.Distance(transform.position, evadeTarget) < 0.1f)
+        {
+            // Determine the previous task and return to it
+            if (carriedFlag != null)
+            {
+                currentState = State.ReturningFlag;
+            }
+            else if (escortedAgent != null)
+            {
+                currentState = State.Escorting;
+            }
+            else
+            {
+                currentState = State.Idle;
+                MakeDecision();
+            }
         }
     }
 
@@ -175,7 +229,7 @@ public class AIAgent : MonoBehaviour
             }
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, targetAgent.transform.position, speed * Time.deltaTime);
+        MoveTowards(targetAgent.transform.position);
         Debug.Log($"{gameObject.name} is moving towards {targetAgent.gameObject.name}");
     }
 
@@ -193,7 +247,8 @@ public class AIAgent : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(team == Team.Red ? 10 : -10, transform.position.y, transform.position.z), speed * Time.deltaTime);
+            Vector3 evadeTarget = CalculateEvadeTarget(new Vector3(team == Team.Red ? 10 : -10, transform.position.y, transform.position.z));
+            MoveTowards(evadeTarget);
             Debug.Log($"{gameObject.name} is returning the flag to its own territory");
         }
     }
@@ -208,7 +263,7 @@ public class AIAgent : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, prisonPosition, speed * Time.deltaTime);
+            MoveTowards(prisonPosition);
             Debug.Log($"{gameObject.name} is moving to prison");
         }
     }
@@ -236,7 +291,7 @@ public class AIAgent : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, wanderTarget, speed * Time.deltaTime);
+            MoveTowards(wanderTarget);
             Debug.Log($"{gameObject.name} is wandering towards {wanderTarget}");
         }
     }
@@ -284,7 +339,8 @@ public class AIAgent : MonoBehaviour
             return;
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, targetFlag.transform.position, speed * Time.deltaTime);
+        Vector3 evadeTarget = CalculateEvadeTarget(targetFlag.transform.position);
+        MoveTowards(evadeTarget);
 
         if (Vector3.Distance(transform.position, targetFlag.transform.position) <= 0.1f)
         {
@@ -331,12 +387,39 @@ public class AIAgent : MonoBehaviour
             return;
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, targetAlly.transform.position, speed * Time.deltaTime);
+        Vector3 evadeTarget = CalculateEvadeTarget(targetAlly.transform.position);
+        MoveTowards(evadeTarget);
 
         if (Vector3.Distance(transform.position, targetAlly.transform.position) <= 0.1f)
         {
             StartEscorting(targetAlly);
         }
+    }
+
+    Vector3 CalculateEvadeTarget(Vector3 target)
+    {
+        Vector3 evadeDirection = Vector3.zero;
+        float closestDistance = float.MaxValue;
+
+        foreach (var agent in enemies)
+        {
+            float distance = Vector3.Distance(transform.position, agent.transform.position);
+            if (distance < closestDistance && distance < evadeRange)
+            {
+                closestDistance = distance;
+                evadeDirection = transform.position - agent.transform.position;
+            }
+        }
+
+        evadeDirection.Normalize();
+        return target + evadeDirection * evadeRange;
+    }
+
+    void MoveTowards(Vector3 target)
+    {
+        Vector3 direction = (target - transform.position).normalized;
+        transform.position += direction * speed * Time.deltaTime;
+        ClampPosition();
     }
 
     public void PickUpFlag(Flag flag)
@@ -479,7 +562,8 @@ public class AIAgent : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(team == Team.Red ? 10 : -10, transform.position.y, transform.position.z), speed * Time.deltaTime);
+            Vector3 evadeTarget = CalculateEvadeTarget(new Vector3(team == Team.Red ? 10 : -10, transform.position.y, transform.position.z));
+            MoveTowards(evadeTarget);
             Debug.Log($"{gameObject.name} is escorting an ally to their own territory");
         }
     }
