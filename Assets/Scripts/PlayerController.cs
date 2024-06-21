@@ -16,9 +16,14 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (controlledAgent != null && controlledAgent.isControlledByPlayer)
+        if (controlledAgent != null && controlledAgent.isControlledByPlayer && controlledAgent.currentState != AIAgent.State.Captured && controlledAgent.currentState != AIAgent.State.GoingToPrison)
         {
             HandlePlayerInput();
+        }
+
+        if (controlledAgent != null && controlledAgent.isControlledByPlayer)
+        {
+            CheckFlagCapture();
         }
     }
 
@@ -26,9 +31,6 @@ public class PlayerController : MonoBehaviour
     {
         float moveHorizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right arrow keys
         float moveVertical = Input.GetAxis("Vertical"); // W/S or Up/Down arrow keys
-
-        // Debug log to check the input values
-        Debug.Log($"Horizontal Input: {moveHorizontal}, Vertical Input: {moveVertical}");
 
         // Combine horizontal and vertical inputs for movement in the X and Y plane
         Vector2 movement = new Vector2(moveHorizontal, moveVertical);
@@ -70,7 +72,15 @@ public class PlayerController : MonoBehaviour
             controlledAgentRenderer.material.color = originalColor; // Reset color
         }
 
-        controlledAgent = blueTeamAgents[index];
+        AIAgent selectedAgent = blueTeamAgents[index];
+
+        // Prevent selection of captured or going to prison agents
+        if (selectedAgent.currentState == AIAgent.State.Captured || selectedAgent.currentState == AIAgent.State.GoingToPrison)
+        {
+            return;
+        }
+
+        controlledAgent = selectedAgent;
         controlledAgent.isControlledByPlayer = true; // Control new agent
 
         // Highlight the selected agent
@@ -80,5 +90,39 @@ public class PlayerController : MonoBehaviour
 
         // Get the Rigidbody2D component of the controlled agent
         controlledAgentRigidbody = controlledAgent.GetComponent<Rigidbody2D>();
+    }
+
+    public void ReleaseControl()
+    {
+        if (controlledAgent != null)
+        {
+            controlledAgent.isControlledByPlayer = false;
+            controlledAgentRenderer.material.color = originalColor; // Reset color
+            controlledAgent = null;
+        }
+    }
+
+    void CheckFlagCapture()
+    {
+        if (controlledAgent.carriedFlag != null && IsInOwnTerritory())
+        {
+            Debug.Log($"{controlledAgent.gameObject.name} has entered its own territory with the flag");
+            controlledAgent.CaptureFlag();
+        }
+    }
+
+    private bool IsInOwnTerritory()
+    {
+        return (controlledAgent.team == Team.Red && controlledAgent.transform.position.x >= 0) ||
+               (controlledAgent.team == Team.Blue && controlledAgent.transform.position.x <= 0);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Flag flag = collision.GetComponent<Flag>();
+        if (flag != null && controlledAgent != null && controlledAgent.currentState != AIAgent.State.Captured && controlledAgent.currentState != AIAgent.State.GoingToPrison)
+        {
+            controlledAgent.PickUpFlag(flag);
+        }
     }
 }

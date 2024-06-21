@@ -12,8 +12,6 @@ GameObject:
   - component: {fileID: -141221147957245508}
   - component: {fileID: 5458005715776386087}
   - component: {fileID: -2862695198352133121}
-  - component: {fileID: 7257333012660102445}
-  - component: {fileID: 470488959601845946}
   m_Layer: 7
   m_Name: RedTeamAgent
   m_TagString: Agent
@@ -150,43 +148,3 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 2}
   m_Direction: 0
---- !u!114 &7257333012660102445
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3586591207555244637}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 982b4dccbbbdff94ea75c6371ee07436, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  team: 1
-  target: {fileID: 0}
-  speed: 5
-  homeBase: {fileID: 6750280041786846105, guid: 999823ed8fb80e842804c144f1ffd730, type: 3}
-  prison: {fileID: 0}
-  originalColor: {r: 0.9450981, g: 0.08627451, b: 0, a: 0}
---- !u!114 &470488959601845946
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3586591207555244637}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  speed: 2
-  decisionInterval: 2
-  detectionRange: 5
-  baseMinBounds: {x: 0, y: -9}
-  baseMaxBounds: {x: 19, y: 9}
-  opponentLayer:
-    serializedVersion: 2
-    m_Bits: 64

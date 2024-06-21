@@ -12,8 +12,6 @@ GameObject:
   - component: {fileID: 5310108077513246872}
   - component: {fileID: 8977573486736659793}
   - component: {fileID: -7828126536296438872}
-  - component: {fileID: 6826870741750302382}
-  - component: {fileID: -6791897113717508411}
   m_Layer: 6
   m_Name: BlueTeamAgent
   m_TagString: Agent
@@ -150,43 +148,3 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 2}
   m_Direction: 0
---- !u!114 &6826870741750302382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4584207212137623027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 982b4dccbbbdff94ea75c6371ee07436, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  team: 0
-  target: {fileID: 0}
-  speed: 5
-  homeBase: {fileID: 9090750361345901774, guid: 4c6619e8008070e41908750469c946c3, type: 3}
-  prison: {fileID: 7732026115519320697, guid: 19e4628258be81f448a282bd46945f5e, type: 3}
-  originalColor: {r: 0, g: 0.49803925, b: 0.9450981, a: 0}
---- !u!114 &-6791897113717508411
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4584207212137623027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  speed: 2
-  decisionInterval: 2
-  detectionRange: 5
-  baseMinBounds: {x: -19, y: -9}
-  baseMaxBounds: {x: 0, y: 9}
-  opponentLayer:
-    serializedVersion: 2
-    m_Bits: 128
