@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class Flag : MonoBehaviour
 {
-    public Team team;
+    private Vector3 originalPosition;
+    public bool isBeingCarried = false;
 
-    void OnTriggerEnter(Collider other)
+    void Start()
     {
-        AIAgent agent = other.GetComponent<AIAgent>();
-        if (agent != null && agent.team != team)
-        {
-            GameManager.Instance.CaptureFlag(agent.team);
-            // Additional logic for flag capture (e.g., respawn flag, notify agents)
-        }
+        originalPosition = transform.position;
+    }
+
+    public void ResetPosition()
+    {
+        transform.SetParent(null); // Detach the flag from the agent
+        transform.position = originalPosition;
+        isBeingCarried = false;
+        gameObject.SetActive(true);
     }
 }
