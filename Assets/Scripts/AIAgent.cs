@@ -14,7 +14,8 @@ public class AIAgent : MonoBehaviour
         Escorting,
         BeingEscorted,
         Wandering,
-        CapturingFlag
+        CapturingFlag,
+        Rescuing
     }
 
     public Team team;
@@ -37,6 +38,7 @@ public class AIAgent : MonoBehaviour
     private AIAgent targetAgent;
     private Vector3 wanderTarget;
     private Flag targetFlag;
+    private AIAgent targetAlly;
     private float wanderTimer;
     private const float maxWanderTime = 5f; // Maximum time to wander before re-evaluating decisions
 
@@ -89,6 +91,9 @@ public class AIAgent : MonoBehaviour
             case State.CapturingFlag:
                 CaptureTargetFlag();
                 break;
+            case State.Rescuing:
+                RescueTargetAlly();
+                break;
         }
     }
 
@@ -104,9 +109,13 @@ public class AIAgent : MonoBehaviour
         {
             currentState = State.Chasing;
         }
-        else if (Random.value < 0.5f && FindFlagToCapture()) // 50% chance to go capture a flag
+        else if (Random.value < 0.4f && FindFlagToCapture()) // 40% chance to go capture a flag
         {
             currentState = State.CapturingFlag;
+        }
+        else if (Random.value < 0.3f && FindCapturedAlly()) // 30% chance to rescue an ally
+        {
+            currentState = State.Rescuing;
         }
         else
         {
@@ -280,6 +289,53 @@ public class AIAgent : MonoBehaviour
         if (Vector3.Distance(transform.position, targetFlag.transform.position) <= 0.1f)
         {
             PickUpFlag(targetFlag);
+        }
+    }
+
+    bool FindCapturedAlly()
+    {
+        AIAgent closestAlly = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var ally in allies)
+        {
+            if (ally == null || ally.currentState != State.Captured)
+            {
+                continue;
+            }
+
+            float distance = Vector3.Distance(transform.position, ally.transform.position);
+            if (distance < closestDistance)
+            {
+                closestAlly = ally;
+                closestDistance = distance;
+            }
+        }
+
+        if (closestAlly != null)
+        {
+            targetAlly = closestAlly;
+            Debug.Log($"{gameObject.name} is now targeting {targetAlly.gameObject.name} for rescue");
+            return true;
+        }
+
+        return false;
+    }
+
+    void RescueTargetAlly()
+    {
+        if (targetAlly == null || targetAlly.currentState != State.Captured)
+        {
+            currentState = State.Idle;
+            MakeDecision();
+            return;
+        }
+
+        transform.position = Vector3.MoveTowards(transform.position, targetAlly.transform.position, speed * Time.deltaTime);
+
+        if (Vector3.Distance(transform.position, targetAlly.transform.position) <= 0.1f)
+        {
+            StartEscorting(targetAlly);
         }
     }
 
