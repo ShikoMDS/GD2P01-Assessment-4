@@ -1,14 +1,26 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
-    public int flagsToWin = 4;
+    public static GameManager Instance { get; private set; }
 
-    private int blueTeamScore = 0;
-    private int redTeamScore = 0;
+    public AIAgent[] redTeamAgents;
+    public AIAgent[] blueTeamAgents;
+    public Transform redTeamPrison;
+    public Transform blueTeamPrison;
+    public Transform redTeamBase;
+    public Transform blueTeamBase;
+    public int flagsToCaptureToWin = 4;
+    public GameObject gameOverUI;
+    public Text gameOverText;
 
-    private void Awake()
+    private int redTeamCapturedFlags = 0;
+    private int blueTeamCapturedFlags = 0;
+
+    public PlayerController playerController;
+
+    void Awake()
     {
         if (Instance == null)
         {
@@ -21,46 +33,68 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ScorePoint(Team team)
+    void Start()
     {
-        if (team == Team.Blue)
-        {
-            blueTeamScore++;
-            Debug.Log($"Blue Team scored! Current score: {blueTeamScore}");
-            if (blueTeamScore >= flagsToWin)
-            {
-                DeclareWinner(Team.Blue);
-            }
-        }
-        else if (team == Team.Red)
-        {
-            redTeamScore++;
-            Debug.Log($"Red Team scored! Current score: {redTeamScore}");
-            if (redTeamScore >= flagsToWin)
-            {
-                DeclareWinner(Team.Red);
-            }
-        }
+        gameOverUI.SetActive(false);
     }
 
-    private void DeclareWinner(Team winningTeam)
+    void Update()
     {
-        Debug.Log($"{winningTeam} Team wins!");
+        CheckForWin();
     }
 
-    public void ReturnFlagToBase(GameObject flag)
+    public void CaptureFlag(Team team)
     {
-        Flag flagScript = flag.GetComponent<Flag>();
-        if (flagScript != null)
+        if (team == Team.Red)
         {
-            flagScript.ResetPosition();
+            redTeamCapturedFlags++;
+        }
+        else if (team == Team.Blue)
+        {
+            blueTeamCapturedFlags++;
         }
     }
 
-    public void ResetScores()
+    void CheckForWin()
     {
-        blueTeamScore = 0;
-        redTeamScore = 0;
-        Debug.Log("Scores reset");
+        if (redTeamCapturedFlags >= flagsToCaptureToWin)
+        {
+            EndGame(Team.Red);
+        }
+        else if (blueTeamCapturedFlags >= flagsToCaptureToWin)
+        {
+            EndGame(Team.Blue);
+        }
+    }
+
+    void EndGame(Team winningTeam)
+    {
+        gameOverUI.SetActive(true);
+        if (winningTeam == Team.Red)
+        {
+            gameOverText.text = "Red Team Wins!";
+        }
+        else if (winningTeam == Team.Blue)
+        {
+            gameOverText.text = "Blue Team Wins!";
+        }
+
+        // Disable further gameplay
+        foreach (var agent in redTeamAgents)
+        {
+            agent.enabled = false;
+        }
+
+        foreach (var agent in blueTeamAgents)
+        {
+            agent.enabled = false;
+        }
+
+        // If using the player controller to control agents, disable player control
+        if (playerController != null && playerController.controlledAgent != null)
+        {
+            playerController.controlledAgent.isControlledByPlayer = false;
+            playerController.controlledAgent = null;
+        }
     }
 }
