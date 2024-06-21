@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class AIAgent : MonoBehaviour
 {
@@ -9,7 +10,11 @@ public class AIAgent : MonoBehaviour
         Chasing,
         ReturningFlag,
         GoingToPrison,
-        Captured
+        Captured,
+        Escorting,
+        BeingEscorted,
+        Wandering,
+        CapturingFlag
     }
 
     public Team team;
@@ -20,11 +25,20 @@ public class AIAgent : MonoBehaviour
     public List<Flag> enemyFlags = new List<Flag>();
     public float speed = 3f;
 
-    public State currentState = State.Idle;
+    public float wanderMinX;
+    public float wanderMaxX;
+    public float wanderMinY;
+    public float wanderMaxY;
 
-    private AIAgent targetAgent;
+    public State currentState = State.Idle;
+    public AIAgent escortedAgent;
     public Flag carriedFlag;
     private Vector3 prisonPosition;
+    private AIAgent targetAgent;
+    private Vector3 wanderTarget;
+    private Flag targetFlag;
+    private float wanderTimer;
+    private const float maxWanderTime = 5f; // Maximum time to wander before re-evaluating decisions
 
     void Update()
     {
@@ -37,6 +51,11 @@ public class AIAgent : MonoBehaviour
         {
             carriedFlag.transform.position = transform.position;
         }
+
+        if (escortedAgent != null)
+        {
+            escortedAgent.transform.position = transform.position;
+        }
     }
 
     void UpdateAI()
@@ -44,7 +63,7 @@ public class AIAgent : MonoBehaviour
         switch (currentState)
         {
             case State.Idle:
-                FindTarget();
+                MakeDecision();
                 break;
             case State.Chasing:
                 ChaseTarget();
@@ -58,38 +77,107 @@ public class AIAgent : MonoBehaviour
             case State.Captured:
                 // Do nothing
                 break;
+            case State.Escorting:
+                EscortAlly();
+                break;
+            case State.BeingEscorted:
+                // Do nothing
+                break;
+            case State.Wandering:
+                Wander();
+                break;
+            case State.CapturingFlag:
+                CaptureTargetFlag();
+                break;
         }
     }
 
-    void FindTarget()
+    void MakeDecision()
     {
+        // Skip decision making if in critical states
+        if (currentState == State.Captured || currentState == State.GoingToPrison || currentState == State.BeingEscorted)
+        {
+            return;
+        }
+
+        if (FindTarget())
+        {
+            currentState = State.Chasing;
+        }
+        else if (Random.value < 0.5f && FindFlagToCapture()) // 50% chance to go capture a flag
+        {
+            currentState = State.CapturingFlag;
+        }
+        else
+        {
+            StartWandering();
+        }
+    }
+
+    bool FindTarget()
+    {
+        AIAgent closestTarget = null;
+        float closestDistance = float.MaxValue;
+
         foreach (var agent in enemies)
         {
-            if (agent.currentState != State.Captured && agent.currentState != State.GoingToPrison && IsEnemyAgentInTerritory(agent))
+            if (agent.currentState != State.Captured && agent.currentState != State.GoingToPrison && IsAgentInMyTerritory(agent))
             {
-                targetAgent = agent;
-                currentState = State.Chasing;
-                Debug.Log($"{gameObject.name} is now chasing {targetAgent.gameObject.name}");
-                break;
+                float distance = Vector3.Distance(transform.position, agent.transform.position);
+
+                if (distance < closestDistance && GetChasersCount(agent) < 2)
+                {
+                    closestTarget = agent;
+                    closestDistance = distance;
+                }
             }
         }
+
+        if (closestTarget != null)
+        {
+            targetAgent = closestTarget;
+            Debug.Log($"{gameObject.name} is now chasing {targetAgent.gameObject.name}");
+            return true;
+        }
+
+        return false;
     }
 
     void ChaseTarget()
     {
-        if (targetAgent == null || targetAgent.currentState == State.Captured || targetAgent.currentState == State.GoingToPrison || !IsEnemyAgentInTerritory(targetAgent))
+        if (targetAgent == null || targetAgent.currentState == State.Captured || targetAgent.currentState == State.GoingToPrison || !IsAgentInMyTerritory(targetAgent))
         {
             currentState = State.Idle;
             return;
         }
 
+        float currentDistance = Vector3.Distance(transform.position, targetAgent.transform.position);
+        foreach (var agent in enemies)
+        {
+            if (agent != targetAgent && agent.currentState != State.Captured && agent.currentState != State.GoingToPrison && IsAgentInMyTerritory(agent))
+            {
+                float distance = Vector3.Distance(transform.position, agent.transform.position);
+                if (distance < currentDistance && GetChasersCount(agent) < 2)
+                {
+                    targetAgent = agent;
+                    currentDistance = distance;
+                    Debug.Log($"{gameObject.name} switched to chasing {targetAgent.gameObject.name}");
+                }
+            }
+        }
+
         transform.position = Vector3.MoveTowards(transform.position, targetAgent.transform.position, speed * Time.deltaTime);
-        //Debug.Log($"{gameObject.name} is moving towards {targetAgent.gameObject.name}");
+        Debug.Log($"{gameObject.name} is moving towards {targetAgent.gameObject.name}");
+    }
+
+    int GetChasersCount(AIAgent agent)
+    {
+        return allies.Count(a => a.currentState == State.Chasing && a.targetAgent == agent);
     }
 
     void ReturnFlag()
     {
-        if (!IsInOwnTerritory())
+        if (IsInOwnTerritory())
         {
             Debug.Log($"{gameObject.name} has entered its own territory with the flag");
             CaptureFlag();
@@ -116,15 +204,103 @@ public class AIAgent : MonoBehaviour
         }
     }
 
+    void StartWandering()
+    {
+        wanderTarget = new Vector3(
+            Random.Range(wanderMinX, wanderMaxX),
+            Random.Range(wanderMinY, wanderMaxY),
+            transform.position.z
+        );
+        wanderTimer = maxWanderTime;
+        currentState = State.Wandering;
+        Debug.Log($"{gameObject.name} is wandering to {wanderTarget}");
+    }
+
+    void Wander()
+    {
+        wanderTimer -= Time.deltaTime;
+
+        if (Vector3.Distance(transform.position, wanderTarget) <= 0.1f || wanderTimer <= 0)
+        {
+            currentState = State.Idle;
+            MakeDecision();
+        }
+        else
+        {
+            transform.position = Vector3.MoveTowards(transform.position, wanderTarget, speed * Time.deltaTime);
+            Debug.Log($"{gameObject.name} is wandering towards {wanderTarget}");
+        }
+    }
+
+    bool FindFlagToCapture()
+    {
+        Flag closestFlag = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var flag in enemyFlags)
+        {
+            if (flag == null)
+            {
+                Debug.LogWarning($"{gameObject.name} found a null flag reference in enemyFlags list");
+                continue;
+            }
+
+            if (!flag.isBeingCarried)
+            {
+                float distance = Vector3.Distance(transform.position, flag.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestFlag = flag;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        if (closestFlag != null)
+        {
+            targetFlag = closestFlag;
+            Debug.Log($"{gameObject.name} is now targeting {targetFlag.gameObject.name} for capture");
+            return true;
+        }
+
+        return false;
+    }
+
+    void CaptureTargetFlag()
+    {
+        if (targetFlag == null || targetFlag.isBeingCarried)
+        {
+            currentState = State.Idle;
+            MakeDecision();
+            return;
+        }
+
+        transform.position = Vector3.MoveTowards(transform.position, targetFlag.transform.position, speed * Time.deltaTime);
+
+        if (Vector3.Distance(transform.position, targetFlag.transform.position) <= 0.1f)
+        {
+            PickUpFlag(targetFlag);
+        }
+    }
+
     public void PickUpFlag(Flag flag)
     {
-        if (currentState != State.Captured && currentState != State.GoingToPrison && carriedFlag == null && enemyFlags.Contains(flag) && !flag.isBeingCarried)
+        if (currentState != State.Captured && currentState != State.GoingToPrison && carriedFlag == null && escortedAgent == null && enemyFlags.Contains(flag) && !flag.isBeingCarried)
         {
             carriedFlag = flag;
-            carriedFlag.isBeingCarried = true;
-            carriedFlag.transform.SetParent(transform); // Make the flag a child of the agent
+            flag.isBeingCarried = true;
+            flag.transform.SetParent(transform); // Make the flag a child of the agent
             currentState = State.ReturningFlag;
             Debug.Log($"{gameObject.name} picked up a flag");
+            // Notify other agents to avoid targeting this flag
+            foreach (var agent in allies)
+            {
+                if (agent != this && agent.currentState == State.CapturingFlag && agent.targetFlag == flag)
+                {
+                    agent.targetFlag = null;
+                    agent.MakeDecision();
+                }
+            }
         }
     }
 
@@ -136,23 +312,25 @@ public class AIAgent : MonoBehaviour
             carriedFlag.transform.SetParent(null); // Detach the flag from the agent
             GameManager.Instance.CaptureFlag(team);
             Destroy(carriedFlag.gameObject);
+            enemyFlags.Remove(carriedFlag);
             carriedFlag = null;
             currentState = State.Idle;
+            MakeDecision();
             Debug.Log($"{gameObject.name} captured the flag");
         }
     }
 
     private bool IsInOwnTerritory()
     {
-        return (team == Team.Red && transform.position.x <= 0) || (team == Team.Blue && transform.position.x >= 0);
+        return (team == Team.Red && transform.position.x >= 0) || (team == Team.Blue && transform.position.x <= 0);
     }
 
     private bool IsInEnemyTerritory()
     {
-        return (team == Team.Red && transform.position.x > 0) || (team == Team.Blue && transform.position.x < 0);
+        return (team == Team.Red && transform.position.x < 0) || (team == Team.Blue && transform.position.x > 0);
     }
 
-    private bool IsEnemyAgentInTerritory(AIAgent agent)
+    private bool IsAgentInMyTerritory(AIAgent agent)
     {
         return (team == Team.Red && agent.transform.position.x > 0) || (team == Team.Blue && agent.transform.position.x < 0);
     }
@@ -162,7 +340,7 @@ public class AIAgent : MonoBehaviour
         AIAgent enemyAgent = collision.GetComponent<AIAgent>();
         if (enemyAgent != null && enemyAgent.team != team && enemyAgent.currentState != State.Captured && enemyAgent.currentState != State.GoingToPrison)
         {
-            if (IsEnemyAgentInTerritory(enemyAgent))
+            if (IsAgentInMyTerritory(enemyAgent))
             {
                 enemyAgent.currentState = State.GoingToPrison;
                 enemyAgent.prisonPosition = GetRandomPrisonPosition();
@@ -188,6 +366,12 @@ public class AIAgent : MonoBehaviour
         {
             PickUpFlag(flag);
         }
+
+        AIAgent allyAgent = collision.GetComponent<AIAgent>();
+        if (allyAgent != null && allyAgent.team == team && allyAgent.currentState == State.Captured)
+        {
+            StartEscorting(allyAgent);
+        }
     }
 
     Vector3 GetRandomPrisonPosition()
@@ -205,11 +389,42 @@ public class AIAgent : MonoBehaviour
     public void FreeFromPrison()
     {
         currentState = State.Idle;
+        MakeDecision();
         Debug.Log($"{gameObject.name} has been freed from prison");
     }
 
     private void OnValidate()
     {
         Debug.Log($"{gameObject.name} state changed to: {currentState}");
+    }
+
+    public void StartEscorting(AIAgent allyAgent)
+    {
+        if (currentState == State.Captured || currentState == State.GoingToPrison || carriedFlag != null || allyAgent == null || allyAgent.team != team || escortedAgent != null)
+        {
+            return;
+        }
+
+        escortedAgent = allyAgent;
+        escortedAgent.currentState = State.BeingEscorted;
+        currentState = State.Escorting;
+        Debug.Log($"{gameObject.name} is escorting {allyAgent.gameObject.name}");
+    }
+
+    void EscortAlly()
+    {
+        if (IsInOwnTerritory())
+        {
+            escortedAgent.FreeFromPrison();
+            escortedAgent = null;
+            currentState = State.Idle;
+            MakeDecision();
+            Debug.Log($"{gameObject.name} has successfully escorted an ally back to their own territory");
+        }
+        else
+        {
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(team == Team.Red ? 10 : -10, transform.position.y, transform.position.z), speed * Time.deltaTime);
+            Debug.Log($"{gameObject.name} is escorting an ally to their own territory");
+        }
     }
 }

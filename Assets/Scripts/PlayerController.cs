@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
         if (controlledAgent != null && controlledAgent.isControlledByPlayer)
         {
             CheckFlagCapture();
+            CheckEscort();
         }
     }
 
@@ -111,6 +112,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void CheckEscort()
+    {
+        if (controlledAgent.currentState == AIAgent.State.Escorting && IsInOwnTerritory())
+        {
+            controlledAgent.escortedAgent.FreeFromPrison();
+            controlledAgent.escortedAgent = null;
+            controlledAgent.currentState = AIAgent.State.Idle;
+            Debug.Log($"{controlledAgent.gameObject.name} has successfully escorted an ally back to their own territory");
+        }
+    }
+
     private bool IsInOwnTerritory()
     {
         return (controlledAgent.team == Team.Red && controlledAgent.transform.position.x >= 0) ||
@@ -123,6 +135,12 @@ public class PlayerController : MonoBehaviour
         if (flag != null && controlledAgent != null && controlledAgent.currentState != AIAgent.State.Captured && controlledAgent.currentState != AIAgent.State.GoingToPrison)
         {
             controlledAgent.PickUpFlag(flag);
+        }
+
+        AIAgent allyAgent = collision.GetComponent<AIAgent>();
+        if (allyAgent != null && allyAgent.team == controlledAgent.team && allyAgent.currentState == AIAgent.State.Captured)
+        {
+            controlledAgent.StartEscorting(allyAgent);
         }
     }
 }
