@@ -49,6 +49,7 @@ public class AIAgent : MonoBehaviour
         if (!isControlledByPlayer)
         {
             UpdateAI();
+            ClampPosition();
         }
 
         if (carriedFlag != null)
@@ -60,8 +61,6 @@ public class AIAgent : MonoBehaviour
         {
             escortedAgent.transform.position = transform.position;
         }
-
-        ClampPosition();
     }
 
     void ClampPosition()
@@ -419,7 +418,7 @@ public class AIAgent : MonoBehaviour
     {
         Vector3 direction = (target - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
-        ClampPosition();
+        // ClampPosition();
     }
 
     public void PickUpFlag(Flag flag)

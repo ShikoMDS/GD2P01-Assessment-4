@@ -9,6 +9,12 @@ public class PlayerController : MonoBehaviour
     private Color originalColor;
     private Rigidbody2D controlledAgentRigidbody;
 
+    // Clamping boundaries
+    public float minX = -16f;
+    public float maxX = 16f;
+    public float minY = -9f;
+    public float maxY = 9f;
+
     void Update()
     {
         HandleAgentSelection();
@@ -36,8 +42,15 @@ public class PlayerController : MonoBehaviour
         // Combine horizontal and vertical inputs for movement in the X and Y plane
         Vector2 movement = new Vector2(moveHorizontal, moveVertical);
 
+        // Calculate the new position
+        Vector2 newPosition = controlledAgentRigidbody.position + movement * moveSpeed * Time.fixedDeltaTime;
+
+        // Clamp the new position
+        newPosition.x = Mathf.Clamp(newPosition.x, minX, maxX);
+        newPosition.y = Mathf.Clamp(newPosition.y, minY, maxY);
+
         // Move the agent using Rigidbody2D
-        controlledAgentRigidbody.MovePosition(controlledAgentRigidbody.position + movement * moveSpeed * Time.fixedDeltaTime);
+        controlledAgentRigidbody.MovePosition(newPosition);
     }
 
     void HandleAgentSelection()
