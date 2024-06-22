@@ -1,4 +1,4 @@
-# Caapture The Flag  
+# Caapture the Flag  
   
 Capture-the-flag game project created for GD2P01 Artificial Intelligence For Games Assessment 4  
   
@@ -16,7 +16,7 @@ Capture-the-flag game project created for GD2P01 Artificial Intelligence For Gam
   
 ## Description  
   
-Capture The Flag is a capture-the-flag game implemented in Unity, featuring AI-controlled agents and player-controlled agents. The game includes mechanics for territory control, flag capturing, and agent imprisonment and rescue.
+Capture the Flag is a capture-the-flag game implemented in Unity, featuring AI-controlled agents and player-controlled agents. The game includes mechanics for territory control, flag capturing, and agent imprisonment and rescue.
   
   
 ## Features  
@@ -61,6 +61,9 @@ This program can be downloaded and run in Unity Engine Editor 2022.3.29f1 from t
 ## Disclaimer  
   
 This program is as complete as I can get it for submission.  
+Issues are with player control...  
+There are issues with checking for only one agent and/or flag to be taken at a time. This occurs when attempting to rescue agents. When picking up a flag first, there are no issues.  
+Issues with rescuing agents as the player.  
 Debug logs were used extensively throughout the code to trace agent states and actions. All functions have been cleaned or submission.  
 All code was written by Shiko based off my own knowledge from classes with lecturers Samah and Alexa, and self driven research of the Unity Engine Editor.  
   

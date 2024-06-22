@@ -372,7 +372,6 @@ public class AIAgent : MonoBehaviour
         flag.IsBeingCarried = true;
         flag.transform.SetParent(transform); // Make the flag a child of the agent
         CurrentState = State.ReturningFlag;
-        Debug.Log($"{gameObject.name} picked up a flag");
         // Notify other agents to avoid targeting this flag
         foreach (var agent in Allies.Where(agent =>
                      agent != this && agent.CurrentState == State.CapturingFlag && agent._targetFlag == flag))

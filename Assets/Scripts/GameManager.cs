@@ -22,6 +22,12 @@ public class GameManager : MonoBehaviour
 
     public GameObject PauseMenuUi;
 
+    // Add references for score and prison UI display
+    public TextMeshProUGUI RedTeamScoreText;
+    public TextMeshProUGUI BlueTeamScoreText;
+    public TextMeshProUGUI RedTeamPrisonText;
+    public TextMeshProUGUI BlueTeamPrisonText;
+
     private int _redTeamCapturedFlags;
     private int _blueTeamCapturedFlags;
 
@@ -45,6 +51,10 @@ public class GameManager : MonoBehaviour
 
         ReplayButton.onClick.AddListener(Retry);
         MenuButton.onClick.AddListener(ReturnToMainMenu);
+
+        // Initialize score and prison display
+        UpdateScoreDisplay();
+        UpdatePrisonDisplay();
     }
 
     private void Update()
@@ -82,7 +92,25 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        // Update score display
+        UpdateScoreDisplay();
+
         CheckForWin();
+    }
+
+    private void UpdateScoreDisplay()
+    {
+        RedTeamScoreText.text = $"Red: {_redTeamCapturedFlags}";
+        BlueTeamScoreText.text = $"Blue: {_blueTeamCapturedFlags}";
+    }
+
+    private void UpdatePrisonDisplay()
+    {
+        var blueTeamInPrison = BlueTeamAgents.Count(agent => agent.CurrentState == AIAgent.State.Captured);
+        var redTeamInPrison = RedTeamAgents.Count(agent => agent.CurrentState == AIAgent.State.Captured);
+
+        RedTeamPrisonText.text = $"In Jail: {redTeamInPrison}";
+        BlueTeamPrisonText.text = $"In Jail: {blueTeamInPrison}";
     }
 
     private void CheckForWin()
@@ -97,6 +125,8 @@ public class GameManager : MonoBehaviour
             BlueTeamWinText.gameObject.SetActive(true);
             EndGame();
         }
+
+        UpdatePrisonDisplay();
 
         var blueTeamInPrison = BlueTeamAgents.Count(agent => agent.CurrentState == AIAgent.State.Captured);
 
