@@ -2,158 +2,128 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public AIAgent[] blueTeamAgents; // Assign this in the Inspector with your blue team agents
-    public AIAgent controlledAgent;
-    public float moveSpeed = 5f;
-    private Renderer controlledAgentRenderer;
-    private Color originalColor;
-    private Rigidbody2D controlledAgentRigidbody;
+    public AIAgent[] BlueTeamAgents;
+    public AIAgent ControlledAgent;
+    public float MoveSpeed = 5f;
+    private Renderer _controlledAgentRenderer;
+    private Color _originalColor;
+    private Rigidbody2D _controlledAgentRigidbody;
 
     // Clamping boundaries
-    public float minX = -16f;
-    public float maxX = 16f;
-    public float minY = -9f;
-    public float maxY = 9f;
+    public float MinX = -16f;
+    public float MaxX = 16f;
+    public float MinY = -9f;
+    public float MaxY = 9f;
 
-    void Update()
+    private void Update()
     {
         HandleAgentSelection();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (controlledAgent != null && controlledAgent.isControlledByPlayer && controlledAgent.currentState != AIAgent.State.Captured && controlledAgent.currentState != AIAgent.State.GoingToPrison)
-        {
-            HandlePlayerInput();
-        }
+        if (ControlledAgent != null && ControlledAgent.IsControlledByPlayer &&
+            ControlledAgent.CurrentState != AIAgent.State.Captured &&
+            ControlledAgent.CurrentState != AIAgent.State.GoingToPrison) HandlePlayerInput();
 
-        if (controlledAgent != null && controlledAgent.isControlledByPlayer)
-        {
-            CheckFlagCapture();
-            CheckEscort();
-        }
+        if (ControlledAgent == null || !ControlledAgent.IsControlledByPlayer) return;
+        CheckFlagCapture();
+        CheckEscort();
     }
 
-    void HandlePlayerInput()
+    private void HandlePlayerInput()
     {
-        float moveHorizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right arrow keys
-        float moveVertical = Input.GetAxis("Vertical"); // W/S or Up/Down arrow keys
+        var moveHorizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right arrow keys
+        var moveVertical = Input.GetAxis("Vertical"); // W/S or Up/Down arrow keys
 
         // Combine horizontal and vertical inputs for movement in the X and Y plane
-        Vector2 movement = new Vector2(moveHorizontal, moveVertical);
+        var movement = new Vector2(moveHorizontal, moveVertical);
 
         // Calculate the new position
-        Vector2 newPosition = controlledAgentRigidbody.position + movement * moveSpeed * Time.fixedDeltaTime;
+        var newPosition = _controlledAgentRigidbody.position + movement * MoveSpeed * Time.fixedDeltaTime;
 
         // Clamp the new position
-        newPosition.x = Mathf.Clamp(newPosition.x, minX, maxX);
-        newPosition.y = Mathf.Clamp(newPosition.y, minY, maxY);
+        newPosition.x = Mathf.Clamp(newPosition.x, MinX, MaxX);
+        newPosition.y = Mathf.Clamp(newPosition.y, MinY, MaxY);
 
         // Move the agent using Rigidbody2D
-        controlledAgentRigidbody.MovePosition(newPosition);
+        _controlledAgentRigidbody.MovePosition(newPosition);
     }
 
-    void HandleAgentSelection()
+    private void HandleAgentSelection()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
             SelectAgent(0);
-        }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
             SelectAgent(1);
-        }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
             SelectAgent(2);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            SelectAgent(3);
-        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4)) SelectAgent(3);
     }
 
-    void SelectAgent(int index)
+    private void SelectAgent(int index)
     {
-        if (index < 0 || index >= blueTeamAgents.Length)
+        if (index < 0 || index >= BlueTeamAgents.Length) return;
+
+        if (ControlledAgent != null)
         {
-            return;
+            ControlledAgent.IsControlledByPlayer = false; // Release previous agent
+            _controlledAgentRenderer.material.color = _originalColor; // Reset color
         }
 
-        if (controlledAgent != null)
-        {
-            controlledAgent.isControlledByPlayer = false; // Release previous agent
-            controlledAgentRenderer.material.color = originalColor; // Reset color
-        }
-
-        AIAgent selectedAgent = blueTeamAgents[index];
+        var selectedAgent = BlueTeamAgents[index];
 
         // Prevent selection of captured or going to prison agents
-        if (selectedAgent.currentState == AIAgent.State.Captured || selectedAgent.currentState == AIAgent.State.GoingToPrison)
-        {
-            return;
-        }
+        if (selectedAgent.CurrentState is AIAgent.State.Captured or AIAgent.State.GoingToPrison) return;
 
-        controlledAgent = selectedAgent;
-        controlledAgent.isControlledByPlayer = true; // Control new agent
+        ControlledAgent = selectedAgent;
+        ControlledAgent.IsControlledByPlayer = true; // Control new agent
 
         // Highlight the selected agent
-        controlledAgentRenderer = controlledAgent.GetComponent<Renderer>();
-        originalColor = controlledAgentRenderer.material.color;
-        controlledAgentRenderer.material.color = Color.yellow; // Highlight color
+        _controlledAgentRenderer = ControlledAgent.GetComponent<Renderer>();
+        _originalColor = _controlledAgentRenderer.material.color;
+        _controlledAgentRenderer.material.color = Color.yellow; // Highlight color
 
         // Get the Rigidbody2D component of the controlled agent
-        controlledAgentRigidbody = controlledAgent.GetComponent<Rigidbody2D>();
+        _controlledAgentRigidbody = ControlledAgent.GetComponent<Rigidbody2D>();
     }
 
     public void ReleaseControl()
     {
-        if (controlledAgent != null)
-        {
-            controlledAgent.isControlledByPlayer = false;
-            controlledAgentRenderer.material.color = originalColor; // Reset color
-            controlledAgent = null;
-        }
+        if (ControlledAgent == null) return;
+        ControlledAgent.IsControlledByPlayer = false;
+        _controlledAgentRenderer.material.color = _originalColor; // Reset color
+        ControlledAgent = null;
     }
 
-    void CheckFlagCapture()
+    private void CheckFlagCapture()
     {
-        if (controlledAgent.carriedFlag != null && IsInOwnTerritory())
-        {
-            Debug.Log($"{controlledAgent.gameObject.name} has entered its own territory with the flag");
-            controlledAgent.CaptureFlag();
-        }
+        if (ControlledAgent.CarriedFlag == null || !IsInOwnTerritory()) return;
+        ControlledAgent.CaptureFlag();
     }
 
-    void CheckEscort()
+    private void CheckEscort()
     {
-        if (controlledAgent.currentState == AIAgent.State.Escorting && IsInOwnTerritory())
-        {
-            controlledAgent.escortedAgent.FreeFromPrison();
-            controlledAgent.escortedAgent = null;
-            controlledAgent.currentState = AIAgent.State.Idle;
-            Debug.Log($"{controlledAgent.gameObject.name} has successfully escorted an ally back to their own territory");
-        }
+        if (ControlledAgent.CurrentState != AIAgent.State.Escorting || !IsInOwnTerritory()) return;
+        ControlledAgent.EscortedAgent.FreeFromPrison();
+        ControlledAgent.EscortedAgent = null;
+        ControlledAgent.CurrentState = AIAgent.State.Idle;
     }
 
     private bool IsInOwnTerritory()
     {
-        return (controlledAgent.team == Team.Red && controlledAgent.transform.position.x >= 0) ||
-               (controlledAgent.team == Team.Blue && controlledAgent.transform.position.x <= 0);
+        return (ControlledAgent.Team == Team.Red && ControlledAgent.transform.position.x >= 0) ||
+               (ControlledAgent.Team == Team.Blue && ControlledAgent.transform.position.x <= 0);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Flag flag = collision.GetComponent<Flag>();
-        if (flag != null && controlledAgent != null && controlledAgent.currentState != AIAgent.State.Captured && controlledAgent.currentState != AIAgent.State.GoingToPrison)
-        {
-            controlledAgent.PickUpFlag(flag);
-        }
+        var flag = collision.GetComponent<Flag>();
+        if (flag != null && ControlledAgent != null && ControlledAgent.CurrentState != AIAgent.State.Captured &&
+            ControlledAgent.CurrentState != AIAgent.State.GoingToPrison) ControlledAgent.PickUpFlag(flag);
 
-        AIAgent allyAgent = collision.GetComponent<AIAgent>();
-        if (allyAgent != null && allyAgent.team == controlledAgent.team && allyAgent.currentState == AIAgent.State.Captured)
-        {
-            controlledAgent.StartEscorting(allyAgent);
-        }
+        var allyAgent = collision.GetComponent<AIAgent>();
+        if (allyAgent != null && allyAgent.Team == ControlledAgent!.Team &&
+            allyAgent.CurrentState == AIAgent.State.Captured) ControlledAgent.StartEscorting(allyAgent);
     }
 }

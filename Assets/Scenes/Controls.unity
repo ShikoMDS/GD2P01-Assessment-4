@@ -405,7 +405,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "1/2/3/4\t\n\nW\t   \nS\t   \nA\t   \nD\t   "
+  m_text: "1/2/3/4\t\n\nW / \u2191\t        \nS / \u2193\t       \nA / \u2190\t       
+    \nD / \u2192\t        "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

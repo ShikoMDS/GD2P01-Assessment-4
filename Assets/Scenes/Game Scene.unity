@@ -1885,31 +1885,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 0
-  isControlledByPlayer: 0
-  prison: {fileID: 531648946}
-  allies:
+  Team: 0
+  IsControlledByPlayer: 0
+  Prison: {fileID: 531648946}
+  Allies:
   - {fileID: 1979194942}
   - {fileID: 2114111872}
   - {fileID: 1875002064}
-  enemies:
+  Enemies:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1749119407}
   - {fileID: 1672884003}
   - {fileID: 507660469}
   - {fileID: 2028884600}
-  speed: 3
-  wanderMinX: 0
-  wanderMaxX: 16
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: 0
+  WanderMaxX: 16
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!4 &952893142 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3240437292673128763, guid: db5ad3b6881253840a5c0aea6d9b4eaf, type: 3}
@@ -2403,9 +2403,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d452aedb6cb44f48a1ff182261d54be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blueTeamAgents: []
-  controlledAgent: {fileID: 0}
-  moveSpeed: 5
+  BlueTeamAgents: []
+  ControlledAgent: {fileID: 0}
+  MoveSpeed: 5
+  MinX: -16
+  MaxX: 16
+  MinY: -9
+  MaxY: 9
 --- !u!114 &1182339734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2418,9 +2422,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d452aedb6cb44f48a1ff182261d54be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blueTeamAgents: []
-  controlledAgent: {fileID: 0}
-  moveSpeed: 5
+  BlueTeamAgents: []
+  ControlledAgent: {fileID: 0}
+  MoveSpeed: 5
+  MinX: -16
+  MaxX: 16
+  MinY: -9
+  MaxY: 9
 --- !u!4 &1197771087 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1556654845782724238, guid: ff9452e989169414f9ad2081b1de7ab2, type: 3}
@@ -2438,31 +2446,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 1
-  isControlledByPlayer: 0
-  prison: {fileID: 620417468}
-  allies:
+  Team: 1
+  IsControlledByPlayer: 0
+  Prison: {fileID: 620417468}
+  Allies:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1799734135}
-  enemies:
+  Enemies:
   - {fileID: 1979194942}
   - {fileID: 2114111872}
   - {fileID: 941989200}
   - {fileID: 1875002064}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1445511624}
   - {fileID: 1454994707}
   - {fileID: 1391386197}
   - {fileID: 1624602503}
-  speed: 3
-  wanderMinX: -16
-  wanderMaxX: 0
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: -16
+  WanderMaxX: 0
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!1001 &1218613296
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2584,25 +2592,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 905508cc5f85ec3439bdba63e1dbbf25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  redTeamAgents:
+  RedTeamAgents:
   - {fileID: 1979194942}
   - {fileID: 2114111872}
   - {fileID: 941989200}
   - {fileID: 1875002064}
-  blueTeamAgents:
+  BlueTeamAgents:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  redTeamPrison: {fileID: 620417468}
-  blueTeamPrison: {fileID: 531648946}
-  flagsToCaptureToWin: 4
-  gameOverUI: {fileID: 880573171}
-  redTeamWinText: {fileID: 546757209}
-  blueTeamWinText: {fileID: 1787875732}
-  replayButton: {fileID: 1965610841}
-  menuButton: {fileID: 1004413535}
-  pauseMenuUI: {fileID: 697657038}
+  RedTeamPrison: {fileID: 620417468}
+  BlueTeamPrison: {fileID: 531648946}
+  FlagsToCaptureToWin: 4
+  GameOverUi: {fileID: 880573171}
+  RedTeamWinText: {fileID: 546757209}
+  BlueTeamWinText: {fileID: 1787875732}
+  ReplayButton: {fileID: 1965610841}
+  MenuButton: {fileID: 1004413535}
+  PauseMenuUi: {fileID: 697657038}
 --- !u!1001 &1268749835
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3118,31 +3126,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 1
-  isControlledByPlayer: 0
-  prison: {fileID: 620417468}
-  allies:
+  Team: 1
+  IsControlledByPlayer: 0
+  Prison: {fileID: 620417468}
+  Allies:
   - {fileID: 1973166470}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  enemies:
+  Enemies:
   - {fileID: 1979194942}
   - {fileID: 2114111872}
   - {fileID: 941989200}
   - {fileID: 1875002064}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1445511624}
   - {fileID: 1454994707}
   - {fileID: 1391386197}
   - {fileID: 1624602503}
-  speed: 3
-  wanderMinX: -16
-  wanderMaxX: 0
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: -16
+  WanderMaxX: 0
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!1001 &1556413964
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3861,31 +3869,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 1
-  isControlledByPlayer: 0
-  prison: {fileID: 620417468}
-  allies:
+  Team: 1
+  IsControlledByPlayer: 0
+  Prison: {fileID: 620417468}
+  Allies:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1197771091}
-  enemies:
+  Enemies:
   - {fileID: 1979194942}
   - {fileID: 2114111872}
   - {fileID: 941989200}
   - {fileID: 1875002064}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1445511624}
   - {fileID: 1454994707}
   - {fileID: 1391386197}
   - {fileID: 1624602503}
-  speed: 3
-  wanderMinX: -16
-  wanderMaxX: 0
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: -16
+  WanderMaxX: 0
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!1001 &1801242639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4052,31 +4060,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 0
-  isControlledByPlayer: 0
-  prison: {fileID: 531648946}
-  allies:
+  Team: 0
+  IsControlledByPlayer: 0
+  Prison: {fileID: 531648946}
+  Allies:
   - {fileID: 1979194942}
   - {fileID: 2114111872}
   - {fileID: 941989200}
-  enemies:
+  Enemies:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1749119407}
   - {fileID: 1672884003}
   - {fileID: 507660469}
   - {fileID: 2028884600}
-  speed: 3
-  wanderMinX: 0
-  wanderMaxX: 16
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: 0
+  WanderMaxX: 16
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!1 &1945529982
 GameObject:
   m_ObjectHideFlags: 0
@@ -4106,13 +4114,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d452aedb6cb44f48a1ff182261d54be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blueTeamAgents:
+  BlueTeamAgents:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  controlledAgent: {fileID: 0}
-  moveSpeed: 5
+  ControlledAgent: {fileID: 0}
+  MoveSpeed: 3
+  MinX: -16
+  MaxX: 16
+  MinY: -9
+  MaxY: 9
 --- !u!4 &1945529984
 Transform:
   m_ObjectHideFlags: 0
@@ -4278,31 +4290,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 1
-  isControlledByPlayer: 0
-  prison: {fileID: 620417468}
-  allies:
+  Team: 1
+  IsControlledByPlayer: 0
+  Prison: {fileID: 620417468}
+  Allies:
   - {fileID: 1467214906}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  enemies:
+  Enemies:
   - {fileID: 1979194942}
   - {fileID: 2114111872}
   - {fileID: 941989200}
   - {fileID: 1875002064}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1445511624}
   - {fileID: 1454994707}
   - {fileID: 1391386197}
   - {fileID: 1624602503}
-  speed: 3
-  wanderMinX: -16
-  wanderMaxX: 0
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: -16
+  WanderMaxX: 0
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!4 &1979194938 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5570663349721874467, guid: cb6794a0cf333ee4788127844599a0f1, type: 3}
@@ -4320,31 +4332,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 0
-  isControlledByPlayer: 0
-  prison: {fileID: 531648946}
-  allies:
+  Team: 0
+  IsControlledByPlayer: 0
+  Prison: {fileID: 531648946}
+  Allies:
   - {fileID: 2114111872}
   - {fileID: 941989200}
   - {fileID: 1875002064}
-  enemies:
+  Enemies:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1749119407}
   - {fileID: 1672884003}
   - {fileID: 507660469}
   - {fileID: 2028884600}
-  speed: 3
-  wanderMinX: 0
-  wanderMaxX: 16
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: 0
+  WanderMaxX: 16
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!1001 &1987323340
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4792,31 +4804,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e1869023ef629e42b8ee97d7d2fefc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  team: 0
-  isControlledByPlayer: 0
-  prison: {fileID: 531648946}
-  allies:
+  Team: 0
+  IsControlledByPlayer: 0
+  Prison: {fileID: 531648946}
+  Allies:
   - {fileID: 1979194942}
   - {fileID: 941989200}
   - {fileID: 1875002064}
-  enemies:
+  Enemies:
   - {fileID: 1973166470}
   - {fileID: 1467214906}
   - {fileID: 1799734135}
   - {fileID: 1197771091}
-  enemyFlags:
+  EnemyFlags:
   - {fileID: 1749119407}
   - {fileID: 1672884003}
   - {fileID: 507660469}
   - {fileID: 2028884600}
-  speed: 3
-  wanderMinX: 0
-  wanderMaxX: 16
-  wanderMinY: -9
-  wanderMaxY: 9
-  currentState: 0
-  escortedAgent: {fileID: 0}
-  carriedFlag: {fileID: 0}
+  Speed: 3
+  WanderMinX: 0
+  WanderMaxX: 16
+  WanderMinY: -9
+  WanderMaxY: 9
+  CurrentState: 0
+  EscortedAgent: {fileID: 0}
+  CarriedFlag: {fileID: 0}
 --- !u!1001 &4495273989439702235
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -5,7 +6,7 @@ public class MenuController : MonoBehaviour
 {
     public void PlayGame()
     {
-        SceneManager.LoadScene("Game Scene"); // Replace "Game" with your main game scene name
+        SceneManager.LoadScene("Game Scene");
     }
 
     public void LoadInstructions()
@@ -32,7 +33,7 @@ public class MenuController : MonoBehaviour
     {
         Application.Quit();
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false; // This line is just for testing in the Unity editor
+        EditorApplication.isPlaying = false; // This line is for testing in the Unity editor
 #endif
     }
 }

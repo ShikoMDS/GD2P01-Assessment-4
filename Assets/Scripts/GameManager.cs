@@ -1,167 +1,133 @@
-using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    public AIAgent[] redTeamAgents;
-    public AIAgent[] blueTeamAgents;
-    public Transform redTeamPrison;
-    public Transform blueTeamPrison;
-    public int flagsToCaptureToWin = 4;
+    public AIAgent[] RedTeamAgents;
+    public AIAgent[] BlueTeamAgents;
+    public Transform RedTeamPrison;
+    public Transform BlueTeamPrison;
+    public int FlagsToCaptureToWin = 4;
 
-    public GameObject gameOverUI;
-    public TextMeshProUGUI redTeamWinText;
-    public TextMeshProUGUI blueTeamWinText;
-    public Button replayButton;
-    public Button menuButton;
+    public GameObject GameOverUi;
+    public TextMeshProUGUI RedTeamWinText;
+    public TextMeshProUGUI BlueTeamWinText;
+    public Button ReplayButton;
+    public Button MenuButton;
 
-    public GameObject pauseMenuUI;
+    public GameObject PauseMenuUi;
 
-    private int redTeamCapturedFlags = 0;
-    private int blueTeamCapturedFlags = 0;
+    private int _redTeamCapturedFlags;
+    private int _blueTeamCapturedFlags;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-        }
         else
-        {
             Destroy(gameObject);
-        }
 
         Time.timeScale = 1;
     }
 
-    void Start()
+    private void Start()
     {
-        gameOverUI.SetActive(false);
-        redTeamWinText.gameObject.SetActive(false);
-        blueTeamWinText.gameObject.SetActive(false);
-        replayButton.gameObject.SetActive(false);
-        menuButton.gameObject.SetActive(false);
+        GameOverUi.SetActive(false);
+        RedTeamWinText.gameObject.SetActive(false);
+        BlueTeamWinText.gameObject.SetActive(false);
+        ReplayButton.gameObject.SetActive(false);
+        MenuButton.gameObject.SetActive(false);
 
-        replayButton.onClick.AddListener(Retry);
-        menuButton.onClick.AddListener(ReturnToMainMenu);
+        ReplayButton.onClick.AddListener(Retry);
+        MenuButton.onClick.AddListener(ReturnToMainMenu);
     }
 
-    void Update()
+    private void Update()
     {
         CheckForWin();
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (Time.timeScale == 0)
-            {
-                Resume();
-            }
-            else
-            {
-                Pause();
-            }
-        }
+        if (!Input.GetKeyDown(KeyCode.Escape)) return;
+        if (Time.timeScale == 0)
+            Resume();
+        else
+            Pause();
     }
 
     public void Pause()
     {
-        pauseMenuUI.SetActive(true);
+        PauseMenuUi.SetActive(true);
         Time.timeScale = 0f;
     }
 
     public void Resume()
     {
-        pauseMenuUI.SetActive(false);
+        PauseMenuUi.SetActive(false);
         Time.timeScale = 1f;
     }
 
     public void CaptureFlag(Team team)
     {
-        if (team == Team.Red)
+        switch (team)
         {
-            redTeamCapturedFlags++;
-            Debug.Log($"Red Team captured a flag. Current score: {redTeamCapturedFlags}");
-        }
-        else if (team == Team.Blue)
-        {
-            blueTeamCapturedFlags++;
-            Debug.Log($"Blue Team captured a flag. Current score: {blueTeamCapturedFlags}");
+            case Team.Red:
+                _redTeamCapturedFlags++;
+                break;
+            case Team.Blue:
+                _blueTeamCapturedFlags++;
+                break;
         }
 
         CheckForWin();
     }
 
-    void CheckForWin()
+    private void CheckForWin()
     {
-        if (redTeamCapturedFlags >= flagsToCaptureToWin)
+        if (_redTeamCapturedFlags >= FlagsToCaptureToWin)
         {
-            redTeamWinText.gameObject.SetActive(true);
+            RedTeamWinText.gameObject.SetActive(true);
             EndGame();
         }
-        else if (blueTeamCapturedFlags >= flagsToCaptureToWin)
+        else if (_blueTeamCapturedFlags >= FlagsToCaptureToWin)
         {
-            blueTeamWinText.gameObject.SetActive(true);
-            EndGame();
-        }
-
-        int blueTeamInPrison = 0;
-        int redTeamInPrison = 0;
-
-        foreach (var agent in blueTeamAgents)
-        {
-            if (agent.currentState == AIAgent.State.Captured)
-            {
-                blueTeamInPrison++;
-            }
-        }
-
-        foreach (var agent in redTeamAgents)
-        {
-            if (agent.currentState == AIAgent.State.Captured)
-            {
-                redTeamInPrison++;
-            }
-        }
-
-        if (blueTeamInPrison >= blueTeamAgents.Length)
-        {
-            redTeamWinText.gameObject.SetActive(true);
+            BlueTeamWinText.gameObject.SetActive(true);
             EndGame();
         }
 
-        if (redTeamInPrison >= redTeamAgents.Length)
+        var blueTeamInPrison = BlueTeamAgents.Count(agent => agent.CurrentState == AIAgent.State.Captured);
+
+        var redTeamInPrison = RedTeamAgents.Count(agent => agent.CurrentState == AIAgent.State.Captured);
+
+        if (blueTeamInPrison >= BlueTeamAgents.Length)
         {
-            blueTeamWinText.gameObject.SetActive(true);
+            RedTeamWinText.gameObject.SetActive(true);
             EndGame();
         }
+
+        if (redTeamInPrison < RedTeamAgents.Length) return;
+        BlueTeamWinText.gameObject.SetActive(true);
+        EndGame();
     }
 
-    void EndGame()
+    private void EndGame()
     {
-        gameOverUI.SetActive(true);
-        replayButton.gameObject.SetActive(true);
-        menuButton.gameObject.SetActive(true);
+        GameOverUi.SetActive(true);
+        ReplayButton.gameObject.SetActive(true);
+        MenuButton.gameObject.SetActive(true);
 
-        foreach (var agent in redTeamAgents)
-        {
-            agent.enabled = false;
-        }
+        foreach (var agent in RedTeamAgents) agent.enabled = false;
 
-        foreach (var agent in blueTeamAgents)
-        {
-            agent.enabled = false;
-        }
+        foreach (var agent in BlueTeamAgents) agent.enabled = false;
 
-        PlayerController playerController = FindObjectOfType<PlayerController>();
-        if (playerController.controlledAgent != null)
+        var playerController = FindObjectOfType<PlayerController>();
+        if (playerController.ControlledAgent != null)
         {
-            playerController.controlledAgent.isControlledByPlayer = false;
-            playerController.controlledAgent = null;
+            playerController.ControlledAgent.IsControlledByPlayer = false;
+            playerController.ControlledAgent = null;
         }
 
         Time.timeScale = 0;
@@ -176,6 +142,6 @@ public class GameManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1;
-        SceneManager.LoadScene("Main Menu"); // Ensure you have a scene named "Main Menu"
+        SceneManager.LoadScene("Main Menu");
     }
 }
